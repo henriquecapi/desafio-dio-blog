@@ -4,11 +4,10 @@ from pydantic import BaseModel
 
 
 class PostIn(BaseModel):
-    title: str
-    date: datetime = datetime.now()
-    published: bool = False
+    title: str | None = None
+    content: str | None = None
 
 
-class Foo(BaseModel):
-    bar: str
-    message: str
+class PostUpdate(BaseModel):
+    title: str | None = None
+    content: str | None = None

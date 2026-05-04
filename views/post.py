@@ -4,6 +4,8 @@ from pydantic import BaseModel
 
 
 class PostOut(BaseModel):
+    id: int
     title: str
-    date: datetime
+    content: str
+    published_at: datetime | None
     published: bool
