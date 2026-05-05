@@ -38,18 +38,20 @@ Abaixo estão os campos que compõem a entidade principal do sistema:
 
 ```text
 capi-blog/
-├── controllers/      # Rotas e Endpoints (HTTP)
-│   └── post.py
-├── models/           # Definições de Tabelas (SQLAlchemy)
-│   └── post.py
-├── schemas/          # Modelos Pydantic de Entrada (Validations)
-│   └── post.py
-├── services/         # Lógica de Negócio (Services)
-│   └── post.py
-├── views/            # Modelos Pydantic de Saída (View Models)
-│   └── post.py
-├── database.py       # Configuração da conexão com o Banco
-├── main.py           # Ponto de entrada da aplicação (FastAPI)
+├── src/
+│   ├── controllers/      # Rotas e Endpoints (HTTP)
+│   │   └── post.py
+│   ├── models/           # Definições de Tabelas (SQLAlchemy)
+│   │   └── post.py
+│   ├── schemas/          # Modelos Pydantic de Entrada (Validations)
+│   │   └── post.py
+│   ├── services/         # Lógica de Negócio (Services)
+│   │   └── post.py
+│   ├── views/            # Modelos Pydantic de Saída (View Models)
+│   │   └── post.py
+│   ├── database.py       # Configuração da conexão com o Banco
+│   ├── main.py           # Ponto de entrada da aplicação (FastAPI)
+│   └── security.py       # Segurança e JWT
 ├── pyproject.toml    # Configurações do Poetry e Formatação
 ├── README.md         # Documentação do Projeto
 └── blog.sqlite       # Banco de dados (gerado automaticamente)
@@ -74,7 +76,7 @@ capi-blog/
 ## 🚀 Como Executar
 
 1.  Instale as dependências: `poetry install`
-2.  Inicie o servidor: `poetry run uvicorn main:app --reload`
+2.  Inicie o servidor: `poetry run uvicorn src.main:app --reload`
 3.  Acesse: `http://127.0.0.1:8000/docs`
 
 ---
