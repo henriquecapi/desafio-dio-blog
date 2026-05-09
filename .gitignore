@@ -3,7 +3,7 @@ __pycache__
 .venv
 blog.sqlite
 tests.db
-README-tests.md
+pyrightconfig.json
 venv
 temp/*
 tests/*
