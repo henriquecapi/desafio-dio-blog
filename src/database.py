@@ -4,6 +4,10 @@ import sqlalchemy as sa
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./blog.sqlite")
 
+# Correção para SQLAlchemy 2.0 (postgres:// -> postgresql://)
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # CRIAR A INSTÂNCIA DO DATABASE
 database = databases.Database(DATABASE_URL)
 
