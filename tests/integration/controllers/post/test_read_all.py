@@ -22,7 +22,7 @@ async def populate_posts(db):
     await service.create_post(PostIn(title="Post 5", content="Conteúdo 5"))
     await service.create_post(PostIn(title="Post 6", content="Conteúdo 6"))
 
-async def test_read_posts_first_page_success(client: AsyncClient, access_token: str):
+async def test_get_posts_first_page_success(client: AsyncClient, access_token: str):
     """Testa a listagem da primeira página (deve retornar 5 posts devido ao limite fixo)."""
     # Given
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -37,7 +37,7 @@ async def test_read_posts_first_page_success(client: AsyncClient, access_token: 
     assert len(content) == 5
     assert content[0]["title"] == "Post 1"
 
-async def test_read_posts_second_page_success(client: AsyncClient, access_token: str):
+async def test_get_posts_second_page_success(client: AsyncClient, access_token: str):
     """Testa a listagem da segunda página (deve retornar o 6º post)."""
     # Given
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -52,7 +52,7 @@ async def test_read_posts_second_page_success(client: AsyncClient, access_token:
     assert len(content) == 1
     assert content[0]["title"] == "Post 6"
 
-async def test_read_posts_no_auth_fail(client: AsyncClient):
+async def test_get_posts_no_auth_fail(client: AsyncClient):
     """Valida que o acesso sem token retorna 401."""
     # When
     response = await client.get("/posts/")
@@ -60,7 +60,7 @@ async def test_read_posts_no_auth_fail(client: AsyncClient):
     # Then
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-async def test_read_posts_default_page_success(client: AsyncClient, access_token: str):
+async def test_get_posts_default_page_success(client: AsyncClient, access_token: str):
     """Valida que o sistema usa pag=1 por padrão se não informado."""
     # Given
     headers = {"Authorization": f"Bearer {access_token}"}

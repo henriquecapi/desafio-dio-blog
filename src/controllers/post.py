@@ -37,8 +37,8 @@ async def delete_user(id: int):
 
 
 @user_router.get("/", summary="Selecionar todos usuários", response_model=list[UserOut])
-async def read_users():
-    return await service.read_users()
+async def get_users(id: int | None = None):
+    return await service.get_users(id=id)
 
 
 @user_router.get(
@@ -46,19 +46,42 @@ async def read_users():
     summary="Selecionar usuário por e-mail",
     response_model=list[UserOut],
 )
-async def read_user_by_email(email: str):
-    return await service.read_user_by_email(email)
+async def get_user_by_email(email: str):
+    return await service.get_user_by_email(email)
 
 
 @user_router.get("/{id}", summary="Selecionar Usuário por id", response_model=UserOut)
-async def read_user_by_id(id: int):
-    return await service.read_user_by_id(id)
+async def get_user_by_id(id: int):
+    return await service.get_user_by_id(id)
 
 
 # POSTS: ---------------------------------------------------------------------------
 @post_router.get("/", summary="Listar todos os Posts", response_model=list[PostOut])
-async def read_posts(pag: int = 1, published: bool | None = None):
-    return await service.read_posts(pag=pag, published=published)
+async def get_posts(pag: int = 1, published: bool | None = None, id: int | None = None):
+    return await service.get_posts(pag=pag, published=published, id=id)
+
+
+@post_router.get("/{id}", summary="Selecionar Post por id", response_model=PostOut)
+async def get_post_by_id(id: int):
+    return await service.get_post_by_id(id)
+
+
+@post_router.get(
+    "/title/{title}",
+    summary="Selecionar posts por título",
+    response_model=list[PostOut],
+)
+async def get_posts_by_title(title: str):
+    return await service.get_posts_by_title(title)
+
+
+@post_router.get(
+    "/content/{content}",
+    summary="Selecionar posts por conteúdo",
+    response_model=list[PostOut],
+)
+async def get_posts_by_content(content: str):
+    return await service.get_posts_by_content(content)
 
 
 @post_router.post(

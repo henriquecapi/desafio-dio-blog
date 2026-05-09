@@ -1,11 +1,13 @@
 from datetime import datetime
 
 from databases.interfaces import Record
-from fastapi import HTTPException, status
+from databases.interfaces import Record
+from typing import cast
 
 from database import database
 from models.post import posts, users
 from schemas.post import PostIn, PostUpdate, UserIn
+from exceptions import NotFoundPostError, NotFoundUserError, BadRequestError, ConflictError
 
 
 class PostService:
@@ -19,6 +21,11 @@ class PostService:
     #         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email ou senha incorretos.")
     #     return user
     async def create_user(self, user: UserIn) -> Record:
+        # Verifica se já existe
+        query = users.select().where(users.c.email == user.email)
+        if await database.fetch_one(query):
+            raise ConflictError("Já existe um usuário com este e-mail.")
+
         query = users.insert().values(
             email=user.email,
             senha=user.senha,
@@ -27,35 +34,37 @@ class PostService:
             updated_at=datetime.now(),
         )
         last_id = await database.execute(query)
-        return await database.fetch_one(users.select().where(users.c.id == last_id))
+        return cast(Record, await database.fetch_one(users.select().where(users.c.id == last_id)))
 
     async def delete_user(self, id: int) -> None:
         # Verifica existência
         user = await database.fetch_one(users.select().where(users.c.id == id))
         if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+            raise NotFoundUserError()
 
         query = users.delete().where(users.c.id == id)
         await database.execute(query)
 
-    async def read_users(self) -> list[Record]:
+    async def get_users(self, id: int | None = None) -> list[Record]:
         query = users.select()
+        if id is not None:
+            query = query.where(users.c.id == id)
         return await database.fetch_all(query)
 
-    async def read_user_by_email(self, email: str) -> list[Record]:
+    async def get_user_by_email(self, email: str) -> list[Record]:
         query = users.select().where(users.c.email.like(f"%{email}%"))
         return await database.fetch_all(query)
 
-    async def read_user_by_id(self, id: int) -> Record:
+    async def get_user_by_id(self, id: int) -> Record:
         query = users.select().where(users.c.id == id)
         user = await database.fetch_one(query)
         if not user:
-            raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+            raise NotFoundUserError()
         return user
 
     # POSTS: ---------------------------------------------------------------------------
-    async def read_posts(
-        self, pag: int = 1, published: bool | None = None
+    async def get_posts(
+        self, pag: int = 1, published: bool | None = None, id: int | None = None
     ) -> list[Record]:
         limit = 5
         offset = (pag - 1) * limit
@@ -63,23 +72,40 @@ class PostService:
 
         if published is not None:
             query = query.where(posts.c.published == published)
+        
+        if id is not None:
+            query = query.where(posts.c.id == id)
         # Se não informado, retorna todos (True + False)
 
         query = query.limit(limit).offset(offset)
         return await database.fetch_all(query)
 
+    async def get_post_by_id(self, id: int) -> Record:
+        query = posts.select().where(posts.c.id == id)
+        post = await database.fetch_one(query)
+        if not post:
+            raise NotFoundPostError()
+        return post
+
+    async def get_posts_by_title(self, title: str) -> list[Record]:
+        query = posts.select().where(posts.c.title.like(f"%{title}%"))
+        return await database.fetch_all(query)
+
+    async def get_posts_by_content(self, content: str) -> list[Record]:
+        query = posts.select().where(posts.c.content.like(f"%{content}%"))
+        return await database.fetch_all(query)
+
     async def create_post(self, post: PostIn) -> Record:
         # Validação de campos obrigatórios
         if not post.title:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="O título é obrigatório.",
-            )
+            raise BadRequestError("O título é obrigatório.")
         if not post.content:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="O conteúdo é obrigatório.",
-            )
+            raise BadRequestError("O conteúdo é obrigatório.")
+
+        # Verifica se já existe post com o mesmo título
+        query = posts.select().where(posts.c.title == post.title)
+        if await database.fetch_one(query):
+            raise ConflictError("Já existe um post com este título.")
 
         query = posts.insert().values(
             title=post.title,
@@ -90,15 +116,18 @@ class PostService:
         last_id = await database.execute(query)
 
         # Retornamos o registro completo
-        return await database.fetch_one(posts.select().where(posts.c.id == last_id))
+        return cast(Record, await database.fetch_one(posts.select().where(posts.c.id == last_id)))
 
     async def update_post(self, id: int, post: PostUpdate) -> Record:
         update_data = post.model_dump(exclude_unset=True)
         if not update_data:
-            raise HTTPException(
-                status_code=400,
-                detail="Nenhum campo informado para atualização.",
-            )
+            raise BadRequestError("Nenhum campo informado para atualização.")
+
+        # Se estiver atualizando o título, verifica se já existe
+        if post.title:
+            query = posts.select().where(posts.c.title == post.title, posts.c.id != id)
+            if await database.fetch_one(query):
+                raise ConflictError("Já existe um post com este título.")
 
         update_data["published_at"] = datetime.now()
         update_data["published"] = False
@@ -108,7 +137,7 @@ class PostService:
 
         updated_post = await database.fetch_one(posts.select().where(posts.c.id == id))
         if not updated_post:
-            raise HTTPException(status_code=404, detail="Post não encontrado.")
+            raise NotFoundPostError()
 
         return updated_post
 
@@ -125,7 +154,7 @@ class PostService:
 
         updated_post = await database.fetch_one(posts.select().where(posts.c.id == id))
         if not updated_post:
-            raise HTTPException(status_code=404, detail="Post não encontrado.")
+            raise NotFoundPostError()
 
         return updated_post
 
@@ -133,7 +162,7 @@ class PostService:
         # Verifica existência
         post = await database.fetch_one(posts.select().where(posts.c.id == id))
         if not post:
-            raise HTTPException(status_code=404, detail="Post não encontrado.")
+            raise NotFoundPostError()
 
         query = posts.delete().where(posts.c.id == id)
         await database.execute(query)
