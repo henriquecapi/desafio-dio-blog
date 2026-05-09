@@ -1,13 +1,13 @@
 from datetime import datetime
-
-from databases.interfaces import Record
-from databases.interfaces import Record
 from typing import cast
 
+from databases.interfaces import Record
+
 from database import database
+from exceptions import (BadRequestError, ConflictError, NotFoundPostError,
+                        NotFoundUserError)
 from models.post import posts, users
 from schemas.post import PostIn, PostUpdate, UserIn
-from exceptions import NotFoundPostError, NotFoundUserError, BadRequestError, ConflictError
 
 
 class PostService:
@@ -34,7 +34,9 @@ class PostService:
             updated_at=datetime.now(),
         )
         last_id = await database.execute(query)
-        return cast(Record, await database.fetch_one(users.select().where(users.c.id == last_id)))
+        return cast(
+            Record, await database.fetch_one(users.select().where(users.c.id == last_id))
+        )
 
     async def delete_user(self, id: int) -> None:
         # Verifica existência
@@ -72,7 +74,7 @@ class PostService:
 
         if published is not None:
             query = query.where(posts.c.published == published)
-        
+
         if id is not None:
             query = query.where(posts.c.id == id)
         # Se não informado, retorna todos (True + False)
@@ -116,7 +118,9 @@ class PostService:
         last_id = await database.execute(query)
 
         # Retornamos o registro completo
-        return cast(Record, await database.fetch_one(posts.select().where(posts.c.id == last_id)))
+        return cast(
+            Record, await database.fetch_one(posts.select().where(posts.c.id == last_id))
+        )
 
     async def update_post(self, id: int, post: PostUpdate) -> Record:
         update_data = post.model_dump(exclude_unset=True)

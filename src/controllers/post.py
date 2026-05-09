@@ -5,12 +5,8 @@ from security import login_required
 from services.post import PostService
 from views.post import PostOut, UserOut
 
-user_router = APIRouter(
-    prefix="/users", dependencies=[Depends(login_required)], tags=["users"]
-)
-post_router = APIRouter(
-    prefix="/posts", dependencies=[Depends(login_required)], tags=["blog-posts"]
-)
+user_router = APIRouter(prefix="/users", dependencies=[Depends(login_required)])
+post_router = APIRouter(prefix="/posts", dependencies=[Depends(login_required)])
 
 service = PostService()
 

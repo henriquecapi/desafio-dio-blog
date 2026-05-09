@@ -4,7 +4,7 @@ from schemas.auth import LoginIn
 from security import sign_jwt
 from views.auth import LoginOut
 
-auth_router = APIRouter(prefix="/auth", tags=["auth"])
+auth_router = APIRouter(prefix="/auth")
 
 
 # checagem -> Buscar usuario na base -> Se existir -> verificar email e a senha -> Criar token -> Retornar token

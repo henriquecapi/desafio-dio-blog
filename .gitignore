@@ -3,8 +3,10 @@ __pycache__
 .venv
 blog.sqlite
 tests.db
+README-tests.md
 venv
 temp/*
+tests/*
 ./src/controllers/__pycache__/
 ./src/models/__pycache__/
 ./src/schemas/__pycache__/

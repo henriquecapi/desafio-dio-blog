@@ -1,11 +1,11 @@
 import time
+from typing import Annotated
 from uuid import uuid4
 
 import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
-from typing import Annotated
 
 SECRET = "my-super-secret-key-that-is-at-least-32-characters-long"
 ALGORITHM = "HS256"

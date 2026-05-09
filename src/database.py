@@ -1,11 +1,17 @@
+import os
 import databases
 import sqlalchemy as sa
 
-DATABASE_URL = "sqlite:///./blog.sqlite"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./blog.sqlite")
 
 # CRIAR A INSTÂNCIA DO DATABASE
 database = databases.Database(DATABASE_URL)
 
 metadata = sa.MetaData()
 
-engine = sa.create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Argumentos extras para o engine (ex: check_same_thread apenas para SQLite)
+engine_args = {}
+if DATABASE_URL.startswith("sqlite"):
+    engine_args["connect_args"] = {"check_same_thread": False}
+
+engine = sa.create_engine(DATABASE_URL, **engine_args)
