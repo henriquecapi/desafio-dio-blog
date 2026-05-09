@@ -5,9 +5,9 @@ import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
-from sqlalchemy.util.typing import Annotated
+from typing import Annotated
 
-SECRET = "my-secret"
+SECRET = "my-super-secret-key-that-is-at-least-32-characters-long"
 ALGORITHM = "HS256"
 
 

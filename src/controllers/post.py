@@ -57,8 +57,8 @@ async def read_user_by_id(id: int):
 
 # POSTS: ---------------------------------------------------------------------------
 @post_router.get("/", summary="Listar todos os Posts", response_model=list[PostOut])
-async def read_posts(pag: int = 1):
-    return await service.read_posts(pag=pag)
+async def read_posts(pag: int = 1, published: bool | None = None):
+    return await service.read_posts(pag=pag, published=published)
 
 
 @post_router.post(

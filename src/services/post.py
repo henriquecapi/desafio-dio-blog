@@ -54,10 +54,18 @@ class PostService:
         return user
 
     # POSTS: ---------------------------------------------------------------------------
-    async def read_posts(self, pag: int = 1) -> list[Record]:
-        limit = 3
+    async def read_posts(
+        self, pag: int = 1, published: bool | None = None
+    ) -> list[Record]:
+        limit = 5
         offset = (pag - 1) * limit
-        query = posts.select().limit(limit).offset(offset)
+        query = posts.select()
+
+        if published is not None:
+            query = query.where(posts.c.published == published)
+        # Se não informado, retorna todos (True + False)
+
+        query = query.limit(limit).offset(offset)
         return await database.fetch_all(query)
 
     async def create_post(self, post: PostIn) -> Record:
