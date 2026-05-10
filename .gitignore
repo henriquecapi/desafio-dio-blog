@@ -13,3 +13,5 @@ tests/*
 ./src/views/__pycache__/
 ./src/services/__pycache__/
 ./src/config/__pycache__/
+./migrations/__pycache__/
+./migrations/versions/__pycache__/

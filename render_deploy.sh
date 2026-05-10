@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
+# Sair imediatamente se um comando falhar
 set -e
 
-alembic upgrade head
-uvicorn src.main:app --host 0.0.0.0 --port $PORT
+echo "Running migrations..."
+poetry run alembic upgrade head
+
+echo "Starting server..."
+poetry run uvicorn src.main:app --host 0.0.0.0 --port $PORT

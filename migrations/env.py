@@ -11,10 +11,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from database import engine, metadata # noqa: E402
-from models import post # noqa: E402   
+from database import engine, metadata # noqa: F401
+from models.post import posts # noqa: F401
 
 target_metadata = metadata
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
