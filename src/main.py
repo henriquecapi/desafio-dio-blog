@@ -1,29 +1,10 @@
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from controllers import auth, post
-from database import database, engine, metadata
 from exceptions import (BadRequestError, ConflictError, NotFoundPostError,
                         NotFoundUserError)
-
-
-# A função lifespan gerencia o ciclo de vida da aplicação.
-# (startup -> lifespan -> shutdown)
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # noqa: F401
-    from models.post import posts  # noqa: F401
-
-    # USAR A INSTÂNCIA 'database' PARA CONECTAR (Startup)
-    await database.connect()
-    metadata.create_all(engine)
-    yield
-    # USAR A INSTÂNCIA 'database' PARA DESCONECTAR (Shutdown)
-    await database.disconnect()
-
 
 tags_metadata = [
     {
@@ -45,12 +26,14 @@ tags_metadata = [
 ]
 
 servers = [
-    {"url": "https://desafio-dio-blog.onrender.com", "description": "Ambiente de Produção"},
+    {
+        "url": "https://desafio-dio-blog.onrender.com",
+        "description": "Ambiente de Produção",
+    },
     {"url": "http://localhost:8000", "description": "Ambiente de Desenvolvimento"},
 ]
 
 app = FastAPI(
-    # openapi_url = None, # Desabilitar as docOpenAPI e Redoc
     title="Capi-Blog API",
     version="0.4.0",
     summary="API assíncrona com FastAPI para gerenciamento de Blogs.",
@@ -69,18 +52,17 @@ Você será capaz de fazer:
 * **Limitar quantidade de posts diários** (_not implemented_).""",
     openapi_tags=tags_metadata,
     servers=servers,
-    redoc_url="/redoc",  # None para Desabilitar a documentação Redoc
-    docs_url="/docs",  # Habilitar a documentação Swagger UI
-    lifespan=lifespan,
+    redoc_url="/redoc",
+    docs_url="/docs",
 )
 
 # Configuração de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite todas as origens
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Permite todos os métodos (GET, POST, OPTIONS, etc.)
-    allow_headers=["*"],  # Permite todos os cabeçalhos
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
