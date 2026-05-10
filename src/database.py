@@ -1,21 +1,12 @@
-import os
 import databases
 import sqlalchemy as sa
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./blog.sqlite")
+from config import settings
 
-# Correção para SQLAlchemy 2.0 (postgres:// -> postgresql://)
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-# CRIAR A INSTÂNCIA DO DATABASE
-database = databases.Database(DATABASE_URL)
-
+database = databases.Database(settings.database_url)
 metadata = sa.MetaData()
 
-# Argumentos extras para o engine (ex: check_same_thread apenas para SQLite)
-engine_args = {}
-if DATABASE_URL.startswith("sqlite"):
-    engine_args["connect_args"] = {"check_same_thread": False}
-
-engine = sa.create_engine(DATABASE_URL, **engine_args)
+if settings.environment == "production":
+    engine = sa.create_engine(settings.database_url)
+else:
+    engine = sa.create_engine(settings.database_url, connect_args={"check_same_thread": False})
