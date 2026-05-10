@@ -1,10 +1,21 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from controllers import auth, post
+from database import database
 from exceptions import (BadRequestError, ConflictError, NotFoundPostError,
                         NotFoundUserError)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await database.connect()
+    yield
+    await database.disconnect()
+
 
 tags_metadata = [
     {
@@ -54,6 +65,7 @@ Você será capaz de fazer:
     servers=servers,
     redoc_url="/redoc",
     docs_url="/docs",
+    lifespan=lifespan,
 )
 
 # Configuração de CORS
